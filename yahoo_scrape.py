@@ -3,10 +3,11 @@ from urllib.request import urlopen as uReq
 import json
 import csv
 import sys
+import requests
 
 ''''
 TODO:
-FIX numbers 
+FIX numbers
 '''
 def read_tkrs(filename):
     '''
@@ -433,8 +434,50 @@ def call_many():
         name = input('Insert Company name. Insert "n" to create file\n').lower()
 
     send_to_excel(complete_info)
+def call_api_on_all():
+    counter = 0
+    allSymbols = []
+    with open('Fortune500-public.csv') as csvfile:
+        reader = csv.reader(csvfile)
+        for row in reader:
+            counter += 1
+            allSymbols.append(row[1])
+    allSymbols = allSymbols[1:-1]
+    for symbols in allSymbols:
+        symbol = symbols
+        url= f"https://cloud.iexapis.com/stable/stock/{symbol}/quote?token=pk_10a2385057d840d38bf57d22c283d27b"
+        result = requests.get(url)
+        if result.status_code != 200:
+            print("returning -1")
+            return -1
+        else:   # if it was 200
+            data = result.json()  # get json data
+            price = data["iexRealtimePrice"]
+            openP = data["open"]
+            closeP = data["close"]
+            peRatio = data["peRatio"]
+            allData = [price,openP, closeP,peRatio]
+            print(allData)
 
-call_many()
+
+            print (data)
+        break
+# def process_data( d ):
+#     """ this function should take in a json-obtained dictionary, d
+#         from a USGS "query" API call and return the average magnitude of _all_ the quakes
+#     """
+#     mags = []
+#     for  in :
+#         mag = dicts["properties"]["mag"]
+#         mags.append(mag)
+#     # compute average
+#     if len(mags) == 0:
+#         return 0
+#     return sum(mags) / len(mags)
+
+call_api_on_all()
+
+# call_many()
 #get_tkrs('https://stockanalysis.com/stocks/')
 
 
